@@ -1,12 +1,12 @@
 #!/bin/sh
 set -eu
 R="$(cd "$(dirname "$0")/.." && pwd)"
-# shared-cmake's scripts: $MSC_SCRIPTS in CI (exported by install@v1), else a sibling checkout.
+# shipyard's scripts: $SHIPYARD_SCRIPTS in CI (exported by install@v1), else a sibling checkout.
 # This used to hardcode one developer's absolute path, so the test only ever passed on that machine --
 # invisible until CI started running it. With neither available there is nothing to build against, so
 # exit 77 = SKIP (the family convention) rather than fail.
-: "${MAVERICKS_SCRIPTS:=${MSC_SCRIPTS:-$R/../mavericks-shared-cmake/scripts}}"
-[ -d "$MAVERICKS_SCRIPTS" ] || { echo "shared-cmake scripts not found at $MAVERICKS_SCRIPTS -- skipping" >&2; exit 77; }
+: "${MAVERICKS_SCRIPTS:=${SHIPYARD_SCRIPTS:-$R/../mavericks-shipyard/scripts}}"
+[ -d "$MAVERICKS_SCRIPTS" ] || { echo "shipyard scripts not found at $MAVERICKS_SCRIPTS -- skipping" >&2; exit 77; }
 export MAVERICKS_SCRIPTS
 STAGE="$(mktemp -d)"; trap 'rm -rf "$STAGE"' EXIT
 ED_ROOT="$R" sh "$R/build/build-tools.sh" "$STAGE" >/dev/null

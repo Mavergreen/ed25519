@@ -38,18 +38,18 @@ jobs:
         with:
           fetch-depth: 0   # version.sh needs the full tag history
 
-      - name: Install mavericks-shared-cmake
-        uses: ModernMavericks/shared-cmake/.github/actions/install@v1  # mavericks-shared-cmake
+      - name: Install mavericks-shipyard
+        uses: ModernMavericks/shipyard/.github/actions/install@v1  # mavericks-shipyard
 
-      - name: Verify shared-cmake installed
+      - name: Verify shipyard installed
         run: |
-          [ -d "$MSC_SCRIPTS" ] || { echo "::error::MSC_SCRIPTS not set by install@v1"; exit 1; }
-          echo "shared-cmake scripts: $MSC_SCRIPTS"
+          [ -d "$SHIPYARD_SCRIPTS" ] || { echo "::error::SHIPYARD_SCRIPTS not set by install@v1"; exit 1; }
+          echo "shipyard scripts: $SHIPYARD_SCRIPTS"
 
       # The shared runner takes the whole top-level suite, so a newly added test runs the day it lands
       # rather than when someone remembers to add a CI line.
       - name: Run the repo's tests
-        run: sh "$MSC_SCRIPTS/run-repo-tests.sh"
+        run: sh "$SHIPYARD_SCRIPTS/run-repo-tests.sh"
 
       - name: Fetch upstream + derive the date-based version
         id: ver
@@ -98,8 +98,8 @@ jobs:
       - name: Artifact conformance
         if: steps.ver.outputs.release == 'yes'
         run: |
-          sh "$MSC_SCRIPTS/artifact-facts.sh" dist "${{ steps.ver.outputs.full }}" \
-            | sh "$MSC_SCRIPTS/check-artifact-conformance.sh"
+          sh "$SHIPYARD_SCRIPTS/artifact-facts.sh" dist "${{ steps.ver.outputs.full }}" \
+            | sh "$SHIPYARD_SCRIPTS/check-artifact-conformance.sh"
 
       - uses: actions/upload-artifact@v7
         with:
@@ -111,7 +111,7 @@ jobs:
     needs: [build]
     permissions:
       contents: write
-    uses: ModernMavericks/shared-cmake/.github/workflows/publish-release.yml@v1
+    uses: ModernMavericks/shipyard/.github/workflows/publish-release.yml@v1
     with:
       version: ${{ needs.build.outputs.version }}
       artifact: mavericks-ed25519

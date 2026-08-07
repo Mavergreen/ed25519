@@ -1,6 +1,6 @@
 #!/bin/sh
 # Build both Sparkle ed25519 tools as Universal binaries: x86_64 @ min-10.9 (against the
-# shared-cmake-fetched 10.9 SDK) + arm64 @ min-11.0, lipo'd together. Installs into
+# shipyard-fetched 10.9 SDK) + arm64 @ min-11.0, lipo'd together. Installs into
 # <stage>/usr/local/bin. Host tools -- the x86_64 slice is 10.9 so a Mavericks dev can run it.
 set -eu
 SELF="$(cd "$(dirname "$0")" && pwd)"
