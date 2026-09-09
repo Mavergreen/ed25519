@@ -8,7 +8,7 @@ R="$(cd "$(dirname "$0")/.." && pwd)"
 : "${MAVERICKS_SCRIPTS:=${SHIPYARD_SCRIPTS:-$R/../mavericks-shipyard/scripts}}"
 [ -d "$MAVERICKS_SCRIPTS" ] || { echo "shipyard scripts not found at $MAVERICKS_SCRIPTS -- skipping" >&2; exit 77; }
 export MAVERICKS_SCRIPTS
-STAGE="$(mktemp -d)"; trap 'rm -rf "$STAGE"' EXIT
+STAGE="$(mktemp -d "${TMPDIR:-/tmp}/build-tools.XXXXXX")"; trap 'rm -rf "$STAGE"' EXIT   # template: 10.9 BSD mktemp requires one
 ED_ROOT="$R" sh "$R/build/build-tools.sh" "$STAGE" >/dev/null
 for t in ed25519-keygen ed25519-sign; do
   b="$STAGE/usr/local/bin/$t"
@@ -18,7 +18,7 @@ for t in ed25519-keygen ed25519-sign; do
 done
 # The keygen's native (host-arch) slice must run: write the private key to a 0600 file + a .pub,
 # print the PUBLIC key to stdout, and NEVER print the private key.
-KT="$(mktemp -d)"; trap 'rm -rf "$STAGE" "$KT"' EXIT
+KT="$(mktemp -d "${TMPDIR:-/tmp}/build-tools-kt.XXXXXX")"; trap 'rm -rf "$STAGE" "$KT"' EXIT   # template: 10.9 BSD mktemp requires one
 out="$("$STAGE/usr/local/bin/ed25519-keygen" -f "$KT/k")"
 [ -f "$KT/k" ] || { echo "keygen did not write the private key file" >&2; rm -rf "$KT"; exit 1; }
 mode=$(ls -l "$KT/k" | cut -c1-10)
