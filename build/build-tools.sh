@@ -11,6 +11,15 @@ STAGE="${1:-$ED_ROOT/build/stage}"
 SRC="$ED_ROOT/src"
 ED="$(sh "$SELF/fetch-ed25519.sh")"
 SCRIPTS="$(msc_scripts)"
+# Same cross-only rule as the tests, checked before any work: on a 10.9 box cc rejects the arm64
+# slice's -mmacosx-version-min=11.0, and the resulting "invalid version number" says nothing about
+# why. The release workflow builds these on an Apple-Silicon runner.
+if [ "$(sh "$SCRIPTS/mavericks_mode.sh")" != cross ]; then
+  echo "build-tools: the Universal build needs a modern host -- its arm64 slice targets macOS 11.0," >&2
+  echo "    which this native 10.9 toolchain cannot target. Build it where release.yml does." >&2
+  exit 1
+fi
+
 SDK="${SDK:-$(sh "$SCRIPTS/fetch_sdk.sh")}"
 
 WORK="$ED_ROOT/build/obj"; rm -rf "$WORK"; mkdir -p "$WORK"

@@ -8,6 +8,15 @@ R="$(cd "$(dirname "$0")/.." && pwd)"
 : "${MAVERICKS_SCRIPTS:=${SHIPYARD_SCRIPTS:-$R/../mavericks-shipyard/scripts}}"
 [ -d "$MAVERICKS_SCRIPTS" ] || { echo "shipyard scripts not found at $MAVERICKS_SCRIPTS -- skipping" >&2; exit 77; }
 export MAVERICKS_SCRIPTS
+# CROSS-ONLY by design, so ask the family's mode helper rather than inventing a local probe. The
+# Universal build compiles its arm64 slice at -mmacosx-version-min=11.0, a version 10.9's clang
+# rejects outright ("invalid version number in '-mmacosx-version-min=11.0'"). A Mavericks box cannot
+# produce this artifact and is not supposed to -- that is a host limitation, not a failure, so it
+# SKIPs (77) the same way every other host-impossible test in the family does.
+[ "$(sh "$MAVERICKS_SCRIPTS/mavericks_mode.sh")" = cross ] || {
+  echo "native 10.9 host: the Universal build needs a modern toolchain for the arm64 slice -- skipping" >&2
+  exit 77
+}
 STAGE="$(ED_ROOT="$R" sh "$R/build/build-tools.sh")"
 pkg="$(VERSION=20190301-mavericks.1 STAGE="$STAGE" ED_ROOT="$R" sh "$R/build/package-pkg.sh")"
 [ -f "$pkg" ] || { echo "no pkg at $pkg" >&2; exit 1; }

@@ -1,6 +1,6 @@
 setup() {
   REPO="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
-  TMP="$(mktemp -d)"
+  TMP="$(mktemp -d "${TMPDIR:-/tmp}/version-bats.XXXXXX")"   # template: 10.9 BSD mktemp requires one
   mkdir -p "$TMP/build"
   # Copy the WHOLE scaffolding, not a named subset: version.sh is a thin wrapper that sources
   # msc.sh to locate the shared implementation, so cherry-picking files silently breaks it.
