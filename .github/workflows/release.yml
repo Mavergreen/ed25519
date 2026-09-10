@@ -105,6 +105,10 @@ jobs:
           # no updater and no Sparkle feed to describe), so generate a minimal one rather than publish
           # commit-derived notes nobody wrote. No SHA256SUMS here -- the workflow regenerates it.
           printf '## ed25519 %s\n\nThe ed25519-sign / ed25519-keygen tools the ModernMavericks family signs releases with, built for OS X 10.9 (x86_64 + arm64).\n' "$V" > dist/RELEASE_NOTES.md
+          # A new upstream links what changed upstream (build/upstream-release-notes-url.sh says where);
+          # a repackage gets nothing. Notes are prose: never fail the release over it.
+          UPSEC="$(sh "$SHIPYARD_SCRIPTS/upstream-notes.sh" "$V" || true)"
+          [ -z "$UPSEC" ] || printf '\n%s\n' "$UPSEC" >> dist/RELEASE_NOTES.md
 
       # Conformance: do the artifacts about to be published agree with each other and with the
       # family's schemes? Gated like the signing step: this is a question about a release rather than
