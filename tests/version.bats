@@ -16,30 +16,30 @@ run_ver() { ( cd "$TMP" && MAVERICKS_ROOT="$TMP" ED_ROOT="$TMP" MAVERICKS_TAGS="
 @test "auto, no prior tags -> mavericks.1, release" {
   run run_ver "" auto
   [ "$status" -eq 0 ]
-  [[ "$output" == *"FULL=20190301-mavericks.1"* ]]
-  [[ "$output" == *"TAG=20190301-mavericks.1"* ]]
-  [[ "$output" == *"RELEASE=yes"* ]]
+  [[ "$output" == *"FULL=20190301-mavericks.1"* ]] || false
+  [[ "$output" == *"TAG=20190301-mavericks.1"* ]] || false
+  [[ "$output" == *"RELEASE=yes"* ]] || false
 }
 @test "auto, current date already released -> no release" {
   run run_ver "20190301-mavericks.1" auto
-  [[ "$output" == *"FULL=20190301-mavericks.1"* ]]
-  [[ "$output" == *"RELEASE=no"* ]]
+  [[ "$output" == *"FULL=20190301-mavericks.1"* ]] || false
+  [[ "$output" == *"RELEASE=no"* ]] || false
 }
 @test "auto, picks max existing rev" {
   run run_ver "$(printf '20190301-mavericks.1\n20190301-mavericks.2')" auto
-  [[ "$output" == *"FULL=20190301-mavericks.2"* ]]
-  [[ "$output" == *"RELEASE=no"* ]]
+  [[ "$output" == *"FULL=20190301-mavericks.2"* ]] || false
+  [[ "$output" == *"RELEASE=no"* ]] || false
 }
 @test "auto, upstream date bumped -> reset to mavericks.1, release" {
   ( cd "$TMP" && printf '20240815\n' > UPSTREAM_VERSION )
   run run_ver "$(printf '20190301-mavericks.1\n20190301-mavericks.2')" auto
-  [[ "$output" == *"FULL=20240815-mavericks.1"* ]]
-  [[ "$output" == *"RELEASE=yes"* ]]
+  [[ "$output" == *"FULL=20240815-mavericks.1"* ]] || false
+  [[ "$output" == *"RELEASE=yes"* ]] || false
 }
 @test "local, increments past max rev" {
   run run_ver "$(printf '20190301-mavericks.1\n20190301-mavericks.2')" local
-  [[ "$output" == *"FULL=20190301-mavericks.3"* ]]
-  [[ "$output" == *"RELEASE=yes"* ]]
+  [[ "$output" == *"FULL=20190301-mavericks.3"* ]] || false
+  [[ "$output" == *"RELEASE=yes"* ]] || false
 }
 @test "bad mode fails" {
   run run_ver "" bogus

@@ -78,25 +78,25 @@ RFC_SIG='kqAJqfDUyrhyDoILX2QlQKKye1QWUD+Ps3YiI+vbadoIWsHkPhWZbkWPNhPQ8R2MOHsurrQ
 @test "rejects a public key that is not 32 bytes" {
   run --separate-stderr verify -p "$(printf '%31s' '' | base64)" "$K/msg" "$SIG_A"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"public key"* ]]
+  [[ "$stderr" == *"public key"* ]] || false
 }
 
 @test "rejects a public key that is not base64" {
   run --separate-stderr verify -p '!!!!' "$K/msg" "$SIG_A"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"public key"* ]]
+  [[ "$stderr" == *"public key"* ]] || false
 }
 
 @test "rejects a signature that is not 64 bytes" {
   run --separate-stderr verify -p "$A" "$K/msg" "$(printf '%63s' '' | base64)"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"signature"* ]]
+  [[ "$stderr" == *"signature"* ]] || false
 }
 
 @test "rejects a file it cannot read" {
   run --separate-stderr verify -p "$A" "$BATS_TEST_TMPDIR/no-such-file" "$SIG_A"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"no-such-file"* ]]
+  [[ "$stderr" == *"no-such-file"* ]] || false
 }
 
 # A typo in the candidate list must not be masked by a later (or earlier) key that happens to match:
@@ -110,23 +110,23 @@ RFC_SIG='kqAJqfDUyrhyDoILX2QlQKKye1QWUD+Ps3YiI+vbadoIWsHkPhWZbkWPNhPQ8R2MOHsurrQ
 @test "requires at least one -p" {
   run --separate-stderr verify "$K/msg" "$SIG_A"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"usage"* ]]
+  [[ "$stderr" == *"usage"* ]] || false
 }
 
 @test "requires both a file and a signature" {
   run --separate-stderr verify -p "$A" "$K/msg"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"usage"* ]]
+  [[ "$stderr" == *"usage"* ]] || false
 }
 
 @test "an oversized public key is refused, not a crash" {
   run --separate-stderr verify -p "$(long_b64 10000 A)" "$K/msg" "$SIG_A"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"public key"* ]]
+  [[ "$stderr" == *"public key"* ]] || false
 }
 
 @test "an oversized signature is refused, not a crash" {
   run --separate-stderr verify -p "$A" "$K/msg" "$(long_b64 10000 A)"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"signature"* ]]
+  [[ "$stderr" == *"signature"* ]] || false
 }

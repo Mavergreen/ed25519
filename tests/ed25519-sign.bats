@@ -37,22 +37,22 @@ sign() { "$BIN/ed25519-sign" "$@"; }
   long_b64 10000 / > "$BATS_TEST_TMPDIR/big"
   run --separate-stderr sign -f "$BATS_TEST_TMPDIR/big" "$K/msg"
   [ "$status" -eq 1 ]
-  [[ "$stderr" == *"private key"* ]]
+  [[ "$stderr" == *"private key"* ]] || false
 }
 
 @test "a key file it cannot read is named" {
   run --separate-stderr sign -f "$BATS_TEST_TMPDIR/no-such-key" "$K/msg"
   [ "$status" -eq 1 ]
-  [[ "$stderr" == *"no-such-key"* ]]
+  [[ "$stderr" == *"no-such-key"* ]] || false
 }
 
 @test "requires -f and exactly one file" {
   run --separate-stderr sign "$K/msg"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"usage"* ]]
+  [[ "$stderr" == *"usage"* ]] || false
   run --separate-stderr sign -f "$K/a"
   [ "$status" -eq 2 ]
-  [[ "$stderr" == *"usage"* ]]
+  [[ "$stderr" == *"usage"* ]] || false
 }
 
 # Transitional: -s stays only until shipyard's sign_and_appcast.sh has moved to -f and been pushed.
@@ -61,7 +61,7 @@ sign() { "$BIN/ed25519-sign" "$@"; }
   run --separate-stderr sign -s "$(cat "$K/a")" "$K/msg"
   [ "$status" -eq 0 ]
   [ "$output" = "$(sign -f "$K/a" "$K/msg")" ]
-  [[ "$stderr" == *"-f"* ]]
+  [[ "$stderr" == *"-f"* ]] || false
 }
 
 # ed25519-sign decoded -s into a fixed 128-byte stack buffer with no bound: 10000 base64 characters
@@ -69,7 +69,7 @@ sign() { "$BIN/ed25519-sign" "$@"; }
 @test "an oversized -s key is refused rather than overflowing" {
   run --separate-stderr sign -s "$(long_b64 10000 /)" "$K/msg"
   [ "$status" -eq 1 ]
-  [[ "$stderr" == *"private key"* ]]
+  [[ "$stderr" == *"private key"* ]] || false
 }
 
 # Whatever goes wrong, what the tool prints must not help anyone reconstruct the key: its output
