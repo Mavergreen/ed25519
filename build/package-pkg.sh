@@ -1,7 +1,7 @@
 #!/bin/sh
 # Compat-guard the x86_64 slice of each Universal tool, pkgbuild a component installing to
 # /usr/local/bin, productbuild it with a 10.9.5 floor (no host-arch restriction -- Universal),
-# and tar the two binaries for scriptable CI use. Double-clickable .pkg + plain tarball.
+# and tar the binaries for scriptable CI use. Double-clickable .pkg + plain tarball.
 set -eu
 SELF="$(cd "$(dirname "$0")" && pwd)"
 ED_ROOT="$(cd "$SELF/.." && pwd)"; export ED_ROOT
@@ -16,7 +16,7 @@ mkdir -p "$OUT"
 
 # 1) prove each shipped tool's x86_64 slice is 10.9-safe (thin it out, guard it).
 THIN="$OUT/thin"; rm -rf "$THIN"; mkdir -p "$THIN"
-for t in ed25519-keygen ed25519-sign; do
+for t in $ED_TOOLS; do
   lipo -thin x86_64 "$STAGE/usr/local/bin/$t" -output "$THIN/$t"
 done
 sh "$SCRIPTS/assert_binary_compatible.sh" "$THIN"/* >&2

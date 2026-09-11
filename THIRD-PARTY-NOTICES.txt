@@ -1,9 +1,10 @@
 mavericks-ed25519 — third-party notices
 =======================================
 
-The `ed25519-keygen` and `ed25519-sign` tools embed the Ed25519 implementation
-by Orson Peters (orlp/ed25519, https://github.com/orlp/ed25519), fetched at the
-commit pinned in UPSTREAM_COMMIT and compiled into the shipped binaries.
+The `ed25519-keygen`, `ed25519-sign`, and `ed25519-verify` tools embed the
+Ed25519 implementation by Orson Peters (orlp/ed25519,
+https://github.com/orlp/ed25519), fetched at the commit pinned in
+UPSTREAM_COMMIT and compiled into the shipped binaries.
 
 orlp/ed25519 is distributed under the zlib license:
 

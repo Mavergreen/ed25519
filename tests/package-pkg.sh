@@ -28,4 +28,5 @@ grep -q 'os-version min="10.9.5"' "$X/x/Distribution" || { echo "floor missing" 
 pkgutil --expand-full "$pkg" "$X/full"
 find "$X/full" -type f -name ed25519-sign  | grep -q . || { echo "pkg payload missing ed25519-sign"  >&2; exit 1; }
 find "$X/full" -type f -name ed25519-keygen | grep -q . || { echo "pkg payload missing ed25519-keygen" >&2; exit 1; }
+find "$X/full" -type f -name ed25519-verify | grep -q . || { echo "pkg payload missing ed25519-verify" >&2; exit 1; }
 echo "package-pkg OK"

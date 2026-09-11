@@ -19,7 +19,7 @@ export MAVERICKS_SCRIPTS
 }
 STAGE="$(mktemp -d "${TMPDIR:-/tmp}/build-tools.XXXXXX")"; trap 'rm -rf "$STAGE"' EXIT   # template: 10.9 BSD mktemp requires one
 ED_ROOT="$R" sh "$R/build/build-tools.sh" "$STAGE" >/dev/null
-for t in ed25519-keygen ed25519-sign; do
+for t in ed25519-keygen ed25519-sign ed25519-verify; do
   b="$STAGE/usr/local/bin/$t"
   [ -x "$b" ] || { echo "missing $t" >&2; exit 1; }
   lipo -info "$b" | grep -q x86_64 || { echo "$t: no x86_64 slice" >&2; exit 1; }
@@ -42,5 +42,9 @@ case "$out" in *"$priv"*) echo "keygen leaked the private key to stdout" >&2; rm
 echo test-message > "$KT/msg"
 sig="$("$STAGE/usr/local/bin/ed25519-sign" -s "$priv" "$KT/msg")"
 printf '%s\n' "$sig" | grep -qE '^[A-Za-z0-9+/]{86}==$' || { echo "ed25519-sign did not emit a valid 64-byte signature" >&2; rm -rf "$KT"; exit 1; }
+# ...and the shipped ed25519-verify names the key that made it (its full contract is in
+# ed25519-verify.bats; this proves the Universal binary is that tool).
+[ "$("$STAGE/usr/local/bin/ed25519-verify" -p "$(cat "$KT/k.pub")" "$KT/msg" "$sig")" = "$(cat "$KT/k.pub")" ] \
+  || { echo "ed25519-verify did not verify ed25519-sign's signature" >&2; rm -rf "$KT"; exit 1; }
 rm -rf "$KT"
 echo "build-tools OK"

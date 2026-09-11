@@ -10,3 +10,7 @@ ED_ROOT="$MAVERICKS_ROOT"; export ED_ROOT   # kept: build scripts here still ref
 # and its date is the version. Renovate bumps UPSTREAM_COMMIT; build/derive-upstream-version.sh
 # writes UPSTREAM_VERSION from it.
 upstream_commit() { tr -d '[:space:]' < "$MAVERICKS_ROOT/UPSTREAM_COMMIT"; }
+
+# The shipped tools, one src/<tool>.c each. build-tools.sh builds and package-pkg.sh guards this one
+# list, so a tool cannot be built without being checked (or checked without being built).
+ED_TOOLS="ed25519-keygen ed25519-sign ed25519-verify"

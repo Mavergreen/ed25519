@@ -104,7 +104,7 @@ jobs:
           # refuses an empty body. This repo keeps no release-notes/ dir (it ships a signing tool with
           # no updater and no Sparkle feed to describe), so generate a minimal one rather than publish
           # commit-derived notes nobody wrote. No SHA256SUMS here -- the workflow regenerates it.
-          printf '## ed25519 %s\n\nThe ed25519-sign / ed25519-keygen tools the ModernMavericks family signs releases with, built for OS X 10.9 (x86_64 + arm64).\n' "$V" > dist/RELEASE_NOTES.md
+          printf '## ed25519 %s\n\nThe ed25519-sign / ed25519-keygen / ed25519-verify tools the ModernMavericks family signs and checks releases with, built for OS X 10.9 (x86_64 + arm64).\n' "$V" > dist/RELEASE_NOTES.md
           # A new upstream links what changed upstream (build/upstream-release-notes-url.sh says where);
           # a repackage gets nothing. Notes are prose: never fail the release over it.
           UPSEC="$(sh "$SHIPYARD_SCRIPTS/upstream-notes.sh" "$V" || true)"

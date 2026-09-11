@@ -41,10 +41,12 @@ static int mavericks_b64_val(char c) {
     return -1;
 }
 
-/* Decode NUL-terminated base64 in into out. Skips whitespace, stops at '='. Returns bytes written,
- * or -1 on an invalid character. out must hold >= 3*(strlen(in)/4) bytes. */
-static long mavericks_b64_decode(const char *in, unsigned char *out) {
-    long o = 0;
+/* Decode NUL-terminated base64 in into out, which holds cap bytes. Skips whitespace, stops at '='.
+ * Returns bytes written, or -1 on an invalid character OR when the decoded bytes would not fit in
+ * cap. The input is usually an argv string of any length, so the caller's buffer is the bound: an
+ * unbounded decode here once let `ed25519-sign -s <10000 chars>` write 7500 bytes over its stack. */
+static long mavericks_b64_decode(const char *in, unsigned char *out, size_t cap) {
+    size_t o = 0;
     int q[4], k = 0;
     for (; *in; in++) {
         if (*in == '=') break;
@@ -53,6 +55,7 @@ static long mavericks_b64_decode(const char *in, unsigned char *out) {
         if (v < 0) return -1;
         q[k++] = v;
         if (k == 4) {
+            if (cap - o < 3) return -1;
             out[o++] = (unsigned char)((q[0] << 2) | (q[1] >> 4));
             out[o++] = (unsigned char)((q[1] << 4) | (q[2] >> 2));
             out[o++] = (unsigned char)((q[2] << 6) | q[3]);
@@ -60,12 +63,14 @@ static long mavericks_b64_decode(const char *in, unsigned char *out) {
         }
     }
     if (k == 2) {
+        if (cap - o < 1) return -1;
         out[o++] = (unsigned char)((q[0] << 2) | (q[1] >> 4));
     } else if (k == 3) {
+        if (cap - o < 2) return -1;
         out[o++] = (unsigned char)((q[0] << 2) | (q[1] >> 4));
         out[o++] = (unsigned char)((q[1] << 4) | (q[2] >> 2));
     }
-    return o;
+    return (long)o;
 }
 
 #endif /* MAVERICKS_B64_H */
