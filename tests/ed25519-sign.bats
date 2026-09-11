@@ -55,21 +55,13 @@ sign() { "$BIN/ed25519-sign" "$@"; }
   [[ "$stderr" == *"usage"* ]] || false
 }
 
-# Transitional: -s stays only until shipyard's sign_and_appcast.sh has moved to -f and been pushed.
-# Then -s is removed outright, and this test becomes "rejects -s".
-@test "-s still signs, but warns that it exposes the key" {
+# -s once took the key as an argument; it is gone, not deprecated. A command line is visible to every
+# process that can list processes and to any shell trace, and a CI log can capture either.
+@test "-s is refused: the key never goes on the command line" {
   run --separate-stderr sign -s "$(cat "$K/a")" "$K/msg"
-  [ "$status" -eq 0 ]
-  [ "$output" = "$(sign -f "$K/a" "$K/msg")" ]
-  [[ "$stderr" == *"-f"* ]] || false
-}
-
-# ed25519-sign decoded -s into a fixed 128-byte stack buffer with no bound: 10000 base64 characters
-# are 7500 bytes written over its stack.
-@test "an oversized -s key is refused rather than overflowing" {
-  run --separate-stderr sign -s "$(long_b64 10000 /)" "$K/msg"
-  [ "$status" -eq 1 ]
-  [[ "$stderr" == *"private key"* ]] || false
+  [ "$status" -eq 2 ]
+  [[ "$stderr" == *"usage"* ]] || false
+  [ -z "$output" ]
 }
 
 # Whatever goes wrong, what the tool prints must not help anyone reconstruct the key: its output
@@ -84,8 +76,6 @@ sign() { "$BIN/ed25519-sign" "$@"; }
     run sign $args
     refute_key_material "$K/a" "$output"
   done
-  run sign -s "$key" "$K/msg"
-  refute_key_material "$K/a" "$output"
 }
 
 @test "ed25519-keygen never prints any piece of the private key it writes" {

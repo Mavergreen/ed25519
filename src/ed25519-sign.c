@@ -6,8 +6,7 @@
  * Prints the base64 ed25519 signature of the file's raw bytes (RFC 8032, deterministic) to stdout.
  * The private key is read from the file ed25519-keygen wrote, or from stdin given `-` -- never from
  * the command line, where other processes (ps) and any shell trace of the caller can see it, and
- * where a CI log can capture it. The old `-s <base64 private key>` still works but warns; it goes
- * once shipyard's sign_and_appcast.sh passes the key with -f.
+ * where a CI log can capture it. (An `-s <base64 private key>` option once did exactly that; it is gone.)
  *
  * Key bytes: the private key is the 96-byte blob private[64] || public[32] that ed25519-keygen writes
  * (private[64] is orlp/ed25519's EXPANDED key, which ed25519_sign takes directly). After signing we
@@ -49,25 +48,18 @@ static int read_key_text(const char *path, char *text, size_t cap) {
 }
 
 int main(int argc, char **argv) {
-    const char *keyfile = NULL, *keyarg = NULL;
+    const char *keyfile = NULL;
     int c;
-    while ((c = getopt(argc, argv, "f:s:")) != -1) {
+    while ((c = getopt(argc, argv, "f:")) != -1) {
         if (c == 'f') keyfile = optarg;
-        else if (c == 's') keyarg = optarg;
         else return usage(argv[0]);
     }
-    if ((keyfile == NULL) == (keyarg == NULL) || argc - optind != 1) return usage(argv[0]);
+    if (keyfile == NULL || argc - optind != 1) return usage(argv[0]);
     const char *path = argv[optind];
 
     char keytext[512];
+    if (read_key_text(keyfile, keytext, sizeof keytext) != 0) return 1;
     const char *keyb64 = keytext;
-    if (keyarg) {
-        fprintf(stderr, "%s: warning: -s puts the private key on the command line, where other processes "
-                        "and shell traces can see it -- use -f <private key file>, or -f - for stdin\n", argv[0]);
-        keyb64 = keyarg;
-    } else if (read_key_text(keyfile, keytext, sizeof keytext) != 0) {
-        return 1;
-    }
 
     unsigned char key[96];
     long klen = mavericks_b64_decode(keyb64, key, sizeof key);
