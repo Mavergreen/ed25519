@@ -21,6 +21,17 @@ mv ed25519_key.pub updater/
 git add updater/ed25519_key.pub
 ```
 
+## Sign a file
+
+`ed25519-sign` reads the private key from a file, or from stdin with `-f -`, and prints the base64
+signature. It never takes the key as an argument: a command line is visible to other processes and to
+shell traces, and ends up in CI logs.
+
+```sh
+ed25519-sign -f ed25519_key update.pkg
+op document get "${item_title}" | ed25519-sign -f - update.pkg
+```
+
 ## Which key signed a release?
 
 `ed25519-verify` takes any number of candidate public keys and prints the one that verifies the
@@ -69,10 +80,9 @@ printf 'Public key (base64):\n  %s\nPrivate key -> %s (0600), public key -> %s.p
 ```sh
 #!/bin/sh
 set -eu
-[ "$#" -eq 3 ] && [ "$1" = -s ] || { echo "usage: $0 -s <private key PEM> <file>" >&2; exit 2; }
-tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT
-( umask 077; printf '%s\n' "$2" > "$tmp" )
-openssl pkeyutl -sign -inkey "$tmp" -rawin -in "$3" | base64
+[ "$#" -eq 3 ] && [ "$1" = -f ] || { echo "usage: $0 -f <private key PEM file | -> <file>" >&2; exit 2; }
+key=$2; [ "$key" = - ] && key=/dev/stdin
+openssl pkeyutl -sign -inkey "$key" -rawin -in "$3" | base64
 ```
 
 `ed25519-verify` (OpenSSL can't sign or verify an empty file; the native tool can):

@@ -40,7 +40,7 @@ case "$out" in *"$priv"*) echo "keygen leaked the private key to stdout" >&2; rm
 # ed25519-sign round-trip: sign a file with the generated key. The signer ed25519_verify's before
 # printing, so a 64-byte (88-char base64) signature back means sign+verify both work end-to-end.
 echo test-message > "$KT/msg"
-sig="$("$STAGE/usr/local/bin/ed25519-sign" -s "$priv" "$KT/msg")"
+sig="$("$STAGE/usr/local/bin/ed25519-sign" -f "$KT/k" "$KT/msg")"
 printf '%s\n' "$sig" | grep -qE '^[A-Za-z0-9+/]{86}==$' || { echo "ed25519-sign did not emit a valid 64-byte signature" >&2; rm -rf "$KT"; exit 1; }
 # ...and the shipped ed25519-verify names the key that made it (its full contract is in
 # ed25519-verify.bats; this proves the Universal binary is that tool).

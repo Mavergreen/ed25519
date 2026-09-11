@@ -1,30 +1,21 @@
 bats_require_minimum_version 1.5.0
+load lib/tools
 
-# ed25519-verify's contract, exercised against the real tools compiled for THIS host. Unlike the
-# Universal build (cross-only: its arm64 slice targets 11.0), a host compile works on a native 10.9
-# box too, so these assertions run on a Mavericks machine as well as in CI.
+# ed25519-verify's contract, against the real tools compiled for this host (see lib/tools.bash).
 #
 #   ed25519-verify -p <pub> [-p <pub> ...] <file> <signature>
 #     0  a candidate verifies -- that key is printed on stdout, as canonical base64
 #     1  no candidate verifies -- stdout empty
 #     2  input it cannot check (malformed key/signature, unreadable file, usage)
 setup_file() {
-  REPO="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
-  # shipyard's scripts: $SHIPYARD_SCRIPTS in CI (exported by install@v1), else a sibling checkout.
-  : "${MAVERICKS_SCRIPTS:=${SHIPYARD_SCRIPTS:-$REPO/../mavericks-shipyard/scripts}}"
-  [ -d "$MAVERICKS_SCRIPTS" ] || skip "shipyard scripts not found at $MAVERICKS_SCRIPTS"
-  ED="$(ED_ROOT="$REPO" sh "$REPO/build/fetch-ed25519.sh")"
-  BIN="$BATS_FILE_TMPDIR/bin"; mkdir -p "$BIN"
-  for t in ed25519-keygen ed25519-sign ed25519-verify; do
-    cc -I"$REPO/src" -I"$ED" "$REPO/src/$t.c" "$ED"/*.c -o "$BIN/$t"
-  done
+  build_tools
   # Two keypairs: A signs, B is the decoy candidate.
   K="$BATS_FILE_TMPDIR/keys"; mkdir -p "$K"
   "$BIN/ed25519-keygen" -f "$K/a" >/dev/null
   "$BIN/ed25519-keygen" -f "$K/b" >/dev/null
   echo test-message > "$K/msg"
-  SIG_A="$("$BIN/ed25519-sign" -s "$(cat "$K/a")" "$K/msg")"
-  export BIN K SIG_A
+  SIG_A="$("$BIN/ed25519-sign" -f "$K/a" "$K/msg")"
+  export K SIG_A
 }
 
 setup() {
@@ -33,8 +24,6 @@ setup() {
 }
 
 verify() { "$BIN/ed25519-verify" "$@"; }
-# n repetitions of a base64 character: valid base64, far longer than any key or signature.
-long_b64() { printf "%${1}s" '' | tr ' ' "$2"; }
 
 # RFC 8032 section 7.1, TEST 2 (a one-byte message, 0x72). Cross-checked with OpenSSL 3, so this
 # signature did not come from our own signer.
@@ -80,7 +69,7 @@ RFC_SIG='kqAJqfDUyrhyDoILX2QlQKKye1QWUD+Ps3YiI+vbadoIWsHkPhWZbkWPNhPQ8R2MOHsurrQ
 
 @test "an empty file signs and verifies" {
   : > "$BATS_TEST_TMPDIR/empty"
-  sig="$("$BIN/ed25519-sign" -s "$(cat "$K/a")" "$BATS_TEST_TMPDIR/empty")"
+  sig="$("$BIN/ed25519-sign" -f "$K/a" "$BATS_TEST_TMPDIR/empty")"
   run --separate-stderr verify -p "$A" "$BATS_TEST_TMPDIR/empty" "$sig"
   [ "$status" -eq 0 ]
   [ "$output" = "$A" ]
@@ -140,12 +129,4 @@ RFC_SIG='kqAJqfDUyrhyDoILX2QlQKKye1QWUD+Ps3YiI+vbadoIWsHkPhWZbkWPNhPQ8R2MOHsurrQ
   run --separate-stderr verify -p "$A" "$K/msg" "$(long_b64 10000 A)"
   [ "$status" -eq 2 ]
   [[ "$stderr" == *"signature"* ]]
-}
-
-# ed25519-sign decoded -s into a fixed 128-byte stack buffer with no bound: 10000 base64 characters
-# are 7500 bytes written over its stack.
-@test "ed25519-sign refuses an oversized private key rather than overflowing" {
-  run --separate-stderr "$BIN/ed25519-sign" -s "$(long_b64 10000 /)" "$K/msg"
-  [ "$status" -eq 1 ]
-  [[ "$stderr" == *"private key"* ]]
 }

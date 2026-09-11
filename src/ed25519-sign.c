@@ -1,9 +1,13 @@
 /*
  * ed25519-sign — sign a file with an ed25519 private key (native, 10.9-buildable).
  *
- *     ed25519-sign -s <base64 private key> <file>
+ *     ed25519-sign -f <private key file | -> <file>
  *
  * Prints the base64 ed25519 signature of the file's raw bytes (RFC 8032, deterministic) to stdout.
+ * The private key is read from the file ed25519-keygen wrote, or from stdin given `-` -- never from
+ * the command line, where other processes (ps) and any shell trace of the caller can see it, and
+ * where a CI log can capture it. The old `-s <base64 private key>` still works but warns; it goes
+ * once shipyard's sign_and_appcast.sh passes the key with -f.
  *
  * Key bytes: the private key is the 96-byte blob private[64] || public[32] that ed25519-keygen writes
  * (private[64] is orlp/ed25519's EXPANDED key, which ed25519_sign takes directly). After signing we
@@ -20,15 +24,50 @@
 #include <string.h>
 #include "ed25519.h"
 #include "mavericks_b64.h"
+#include <unistd.h>
 #include "mavericks_file.h"
 
+static int usage(const char *argv0) {
+    fprintf(stderr, "usage: %s -f <private key file | -> <file>\n", argv0);
+    return 2;
+}
+
+/* Read the base64 private key from path (stdin for "-") into text, NUL-terminated. A key is 128
+ * base64 characters and a newline; input that does not fit in cap is refused rather than decoded.
+ * Returns 0, or -1 having said why -- naming the path, never echoing the contents. */
+static int read_key_text(const char *path, char *text, size_t cap) {
+    FILE *f = strcmp(path, "-") == 0 ? stdin : fopen(path, "r");
+    if (!f) { perror(path); return -1; }
+    size_t n = fread(text, 1, cap - 1, f);
+    int more = n == cap - 1 && fgetc(f) != EOF;
+    int err = ferror(f);
+    if (f != stdin) fclose(f);
+    if (err) { fprintf(stderr, "%s: read error\n", path); return -1; }
+    if (more) { fprintf(stderr, "bad private key: %s is larger than any key\n", path); return -1; }
+    text[n] = 0;
+    return 0;
+}
+
 int main(int argc, char **argv) {
-    if (argc != 4 || strcmp(argv[1], "-s") != 0) {
-        fprintf(stderr, "usage: %s -s <base64 private key> <file>\n", argv[0]);
-        return 2;
+    const char *keyfile = NULL, *keyarg = NULL;
+    int c;
+    while ((c = getopt(argc, argv, "f:s:")) != -1) {
+        if (c == 'f') keyfile = optarg;
+        else if (c == 's') keyarg = optarg;
+        else return usage(argv[0]);
     }
-    const char *keyb64 = argv[2];
-    const char *path   = argv[3];
+    if ((keyfile == NULL) == (keyarg == NULL) || argc - optind != 1) return usage(argv[0]);
+    const char *path = argv[optind];
+
+    char keytext[512];
+    const char *keyb64 = keytext;
+    if (keyarg) {
+        fprintf(stderr, "%s: warning: -s puts the private key on the command line, where other processes "
+                        "and shell traces can see it -- use -f <private key file>, or -f - for stdin\n", argv[0]);
+        keyb64 = keyarg;
+    } else if (read_key_text(keyfile, keytext, sizeof keytext) != 0) {
+        return 1;
+    }
 
     unsigned char key[96];
     long klen = mavericks_b64_decode(keyb64, key, sizeof key);
