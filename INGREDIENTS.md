@@ -30,8 +30,8 @@ with `own-upstream-paths: UPSTREAM_COMMIT`.
 
 ## Release notes
 
-This repo keeps no `release-notes/` directory: the product is a single signing tool with no Sparkle
-updater and no feed description to fill. Its release workflow generates a minimal `RELEASE_NOTES.md`
-into the artifact, which the shared `publish-release.yml` uses as the Release body — it refuses an
-empty one. If this ever grows curated notes, adopt `release-notes-file.sh` as golang and
-macports-legacy-support do.
+`release.yml` calls mavericks-shipyard's `release-notes.sh` (`--product ed25519`, `--min-os 10.9.5`)
+to write `dist/RELEASE_NOTES.md`, which the shared `publish-release.yml` uses as the Release body —
+it refuses an empty one. This repo has no Sparkle updater and publishes no appcast, so the Release
+body is that file's only consumer; there is no second copy to keep in sync. See `release-notes/`
+for the (optional) per-release prose convention.

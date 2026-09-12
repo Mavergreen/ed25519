@@ -101,14 +101,16 @@ jobs:
           V="${{ steps.ver.outputs.full }}"
           cp "build/out/ed25519-${V}.pkg" dist/
           # The body travels IN the artifact: publish-release.yml does not check out the repo, and it
-          # refuses an empty body. This repo keeps no release-notes/ dir (it ships a signing tool with
-          # no updater and no Sparkle feed to describe), so generate a minimal one rather than publish
-          # commit-derived notes nobody wrote. No SHA256SUMS here -- the workflow regenerates it.
-          printf '## ed25519 %s\n\nThe ed25519-sign / ed25519-keygen / ed25519-verify tools the ModernMavericks family signs and checks releases with, built for OS X 10.9 (x86_64 + arm64).\n' "$V" > dist/RELEASE_NOTES.md
-          # A new upstream links what changed upstream (build/upstream-release-notes-url.sh says where);
-          # a repackage gets nothing. Notes are prose: never fail the release over it.
-          UPSEC="$(sh "$SHIPYARD_SCRIPTS/upstream-notes.sh" "$V" || true)"
-          [ -z "$UPSEC" ] || printf '\n%s\n' "$UPSEC" >> dist/RELEASE_NOTES.md
+          # refuses an empty body. This repo has no Sparkle updater or feed, so the Release body is
+          # the notes file's only consumer -- release-notes.sh still writes it, for the same "What
+          # changed" / ingredient logic the rest of the family gets. No SHA256SUMS here -- the
+          # workflow regenerates it.
+          sh "$SHIPYARD_SCRIPTS/release-notes.sh" \
+            --tag "${{ steps.ver.outputs.tag }}" \
+            --version "$V" \
+            --product ed25519 \
+            --min-os 10.9.5 \
+            --out dist/RELEASE_NOTES.md
 
       # Conformance: do the artifacts about to be published agree with each other and with the
       # family's schemes? Gated like the signing step: this is a question about a release rather than
