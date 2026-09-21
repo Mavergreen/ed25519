@@ -1,0 +1,2 @@
+VERSION    # release.yml stamps the resolved version here; shipyard's resolve-version.sh family contract reads it back from $MAVERICKS_ROOT/VERSION
+UPSTREAM_VERSION    # build/derive-upstream-version.sh stamps the pinned commit's date here; shipyard's lib.sh/resolve-version.sh family contract reads it back from $MAVERICKS_ROOT/UPSTREAM_VERSION

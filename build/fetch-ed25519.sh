@@ -10,7 +10,7 @@ ED_ROOT="$(cd "$SELF/.." && pwd)"; export ED_ROOT
 . "$SELF/msc.sh"   # -> $SHIPYARD (installed mavericks-shipyard scripts dir)
 
 C="$(upstream_commit)"
-DEST="${1:-$ED_ROOT/build/ed25519}"
+DEST="${1:-$ED_BUILD/upstream}"
 mkdir -p "$DEST"; DEST="$(cd "$DEST" && pwd)"   # normalize -> contract: prints an ABSOLUTE src dir
 CO="$DEST/ed25519-$C"
 sh "$SHIPYARD/clone_pinned.sh" https://github.com/orlp/ed25519.git master "$C" "$CO"

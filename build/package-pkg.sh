@@ -8,8 +8,8 @@ ED_ROOT="$(cd "$SELF/.." && pwd)"; export ED_ROOT
 . "$SELF/lib.sh"
 
 : "${VERSION:?package-pkg: VERSION required}"
-STAGE="${STAGE:-$ED_ROOT/build/stage}"
-OUT="${OUT:-$ED_ROOT/build/out}"
+STAGE="${STAGE:-$ED_BUILD/stage}"
+OUT="${OUT:-$ED_BUILD/out}"
 SCRIPTS="$(msc_scripts)"
 ID="dev.modernmavericks.ed25519"
 mkdir -p "$OUT"

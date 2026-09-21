@@ -7,7 +7,7 @@ SELF="$(cd "$(dirname "$0")" && pwd)"
 ED_ROOT="$(cd "$SELF/.." && pwd)"; export ED_ROOT
 . "$SELF/lib.sh"
 
-STAGE="${1:-$ED_ROOT/build/stage}"
+STAGE="${1:-$ED_BUILD/stage}"
 SRC="$ED_ROOT/src"
 ED="$(sh "$SELF/fetch-ed25519.sh")"
 SCRIPTS="$(msc_scripts)"
@@ -22,7 +22,7 @@ fi
 
 SDK="${SDK:-$(sh "$SCRIPTS/fetch_sdk.sh")}"
 
-WORK="$ED_ROOT/build/obj"; rm -rf "$WORK"; mkdir -p "$WORK"
+WORK="$ED_BUILD/obj"; rm -rf "$WORK"; mkdir -p "$WORK"
 rm -rf "$STAGE"; mkdir -p "$STAGE/usr/local/bin"
 
 for tool in $ED_TOOLS; do

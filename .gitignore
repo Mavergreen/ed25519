@@ -1,10 +1,8 @@
 /VERSION
 /UPSTREAM_VERSION
-/build/stage/
-/build/obj/
-/build/out/
-/build/ed25519/
-dist/
+# The default build root is $MAVERICKS_BUILD_ROOT (outside the tree); this is only the
+# deliberate-in-tree escape hatch (MAVERICKS_BUILD_ROOT="$PWD" sh build/build-tools.sh).
+/ed25519-cross/
 ._*
 .DS_Store
 .superpowers/
