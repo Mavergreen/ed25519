@@ -11,7 +11,7 @@ ED_ROOT="$(cd "$SELF/.." && pwd)"; export ED_ROOT
 STAGE="${STAGE:-$ED_BUILD/stage}"
 OUT="${OUT:-$ED_BUILD/out}"
 SCRIPTS="$(msc_scripts)"
-ID="dev.modernmavericks.ed25519"
+ID="dev.mavergreen.ed25519"
 mkdir -p "$OUT"
 
 # 1) prove each shipped tool's x86_64 slice is 10.9-safe (thin it out, guard it).
@@ -25,10 +25,14 @@ sh "$SCRIPTS/assert_binary_compatible.sh" "$THIN"/* >&2
 mkdir -p "$STAGE/usr/local/share/doc/mavericks-ed25519"
 cp "$ED_ROOT/THIRD-PARTY-NOTICES.txt" "$STAGE/usr/local/share/doc/mavericks-ed25519/THIRD-PARTY-NOTICES.txt"
 
-# 2) flat component pkg from the staging root (absolute layout -> install-location /).
+# 2) flat component pkg from the staging root (absolute layout -> install-location /), with the
+#    ONE-TIME MIGRATION off the ModernMavericks identity (flag day 2026-09-22) as its preinstall: it
+#    forgets this pkg's pre-rename receipt. DELETABLE with build/flag-day-preinstall.sh.
+SCR="$OUT/pkg-scripts"; rm -rf "$SCR"
+sh "$SELF/flag-day-preinstall.sh" dev.modernmavericks.ed25519 "$SCR/preinstall"
 mkdir -p "$OUT/component"
 comp="$OUT/component/ed25519-component.pkg"
-pkgbuild --root "$STAGE" --identifier "$ID" --version "$VERSION" --install-location / "$comp" >&2
+pkgbuild --root "$STAGE" --identifier "$ID" --version "$VERSION" --scripts "$SCR" --install-location / "$comp" >&2
 
 # 3) wrap with the 10.9.5 floor; NO --host-arch (Universal installs on any arch).
 final="$OUT/ed25519-${VERSION}.pkg"

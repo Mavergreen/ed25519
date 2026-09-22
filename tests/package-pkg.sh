@@ -24,6 +24,9 @@ pkg="$(VERSION=20190301-mavericks.1 STAGE="$STAGE" ED_ROOT="$R" sh "$R/build/pac
 X="$(mktemp -d "${TMPDIR:-/tmp}/package-pkg.XXXXXX")"; trap 'rm -rf "$X"' EXIT   # template: 10.9 BSD mktemp requires one
 pkgutil --expand "$pkg" "$X/x"
 grep -q 'os-version min="10.9.5"' "$X/x/Distribution" || { echo "floor missing" >&2; exit 1; }
+# The flag-day preinstall rides in the component (tests/flag-day-preinstall.sh tests what it does).
+grep -q -- '--forget "dev.modernmavericks.ed25519"' "$X"/x/*.pkg/Scripts/preinstall 2>/dev/null \
+  || { echo "pkg carries no flag-day preinstall" >&2; exit 1; }
 # The tools ship inside the pkg payload -- verify, exactly as CI extracts ed25519-sign.
 pkgutil --expand-full "$pkg" "$X/full"
 find "$X/full" -type f -name ed25519-sign  | grep -q . || { echo "pkg payload missing ed25519-sign"  >&2; exit 1; }
