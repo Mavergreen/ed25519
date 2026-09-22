@@ -7,7 +7,7 @@
 build_tools() {
   REPO="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
   # shipyard's scripts: $SHIPYARD_SCRIPTS in CI (exported by install@v1), else a sibling checkout.
-  : "${MAVERICKS_SCRIPTS:=${SHIPYARD_SCRIPTS:-$REPO/../mavericks-shipyard/scripts}}"
+  : "${MAVERICKS_SCRIPTS:=${SHIPYARD_SCRIPTS:-$REPO/../mavergreen-shipyard/scripts}}"
   [ -d "$MAVERICKS_SCRIPTS" ] || skip "shipyard scripts not found at $MAVERICKS_SCRIPTS"
   ED="$(ED_ROOT="$REPO" sh "$REPO/build/fetch-ed25519.sh")"
   BIN="$BATS_FILE_TMPDIR/bin"; mkdir -p "$BIN"
