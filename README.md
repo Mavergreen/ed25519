@@ -45,7 +45,7 @@ its updater:
 
 ```sh
 product=openssh
-curl -fsSL "https://github.com/ModernMavericks/$product/releases/latest/download/appcast.xml" > appcast.xml
+curl -fsSL "https://github.com/Mavergreen/$product/releases/latest/download/appcast.xml" > appcast.xml
 url=$(sed -n 's/.*<enclosure[^>]* url="\([^"]*\)".*/\1/p' appcast.xml | head -1)
 sig=$(sed -n 's/.*sparkle:edSignature="\([^"]*\)".*/\1/p' appcast.xml | head -1)
 curl -fsSL -o update.pkg "$url"

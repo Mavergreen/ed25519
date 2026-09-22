@@ -10,7 +10,7 @@ which is a reason to keep its inputs few and legible.
 | Ingredient | Pinned in | Renovate | On a bump |
 |---|---|---|---|
 | orlp/ed25519 source (own upstream) | `UPSTREAM_COMMIT` (a 40-char commit) | ✅ `git-refs` on `orlp/ed25519` | `build/version.sh` cuts `<date>-mavericks.1` |
-| MacOSX10.9 SDK, packaging helpers | `ModernMavericks/shipyard@v1` | ✅ github-actions manager tracks the tag | `@v1` is a *moving* tag: content changes without the pin changing, so nothing auto-repackages |
+| MacOSX10.9 SDK, packaging helpers | `Mavergreen/shipyard@v1` | ✅ github-actions manager tracks the tag | `@v1` is a *moving* tag: content changes without the pin changing, so nothing auto-repackages |
 
 Not ingredients: the build scripts and `patches/` are this repo's own recipe. A change there is a
 repackage you cut deliberately (`workflow_dispatch` with `local_release=true`).

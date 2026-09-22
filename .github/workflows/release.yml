@@ -53,7 +53,7 @@ jobs:
           fetch-depth: 0   # version.sh needs the full tag history
 
       - name: Install mavericks-shipyard
-        uses: ModernMavericks/shipyard/.github/actions/install@v1  # mavericks-shipyard
+        uses: Mavergreen/shipyard/.github/actions/install@v1  # mavericks-shipyard
 
       - name: Verify shipyard installed
         run: |
@@ -142,7 +142,7 @@ jobs:
     needs: [build]
     permissions:
       contents: write
-    uses: ModernMavericks/shipyard/.github/workflows/publish-release.yml@v1
+    uses: Mavergreen/shipyard/.github/workflows/publish-release.yml@v1
     with:
       version: ${{ needs.build.outputs.version }}
       artifact: mavericks-ed25519
