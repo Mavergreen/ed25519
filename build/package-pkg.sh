@@ -1,6 +1,6 @@
 #!/bin/sh
-# Compat-guard the x86_64 slice of each Universal tool, pkgbuild a component installing to
-# /usr/local/bin, productbuild it with a 10.9.5 floor (no host-arch restriction -- Universal),
+# Compat-guard both slices (x86_64 and arm64) of each Universal tool, pkgbuild a component installing
+# to /usr/local/bin, productbuild it with a 10.9.5 floor (no host-arch restriction -- Universal),
 # and tar the binaries for scriptable CI use. Double-clickable .pkg + plain tarball.
 set -eu
 SELF="$(cd "$(dirname "$0")" && pwd)"
@@ -14,12 +14,14 @@ SCRIPTS="$(msc_scripts)"
 ID="dev.mavergreen.ed25519"
 mkdir -p "$OUT"
 
-# 1) prove each shipped tool's x86_64 slice is 10.9-safe (thin it out, guard it).
-THIN="$OUT/thin"; rm -rf "$THIN"; mkdir -p "$THIN"
+# 1) prove each shipped tool's slices are safe: guard the fat Universal binaries directly. The guard
+#    checks every slice against its own arch's pinned minos/SDK (sdk-pins.sh) and keeps its import and
+#    selector checks on the x86_64 slice.
+BIN=""
 for t in $ED_TOOLS; do
-  lipo -thin x86_64 "$STAGE/usr/local/bin/$t" -output "$THIN/$t"
+  BIN="$BIN $STAGE/usr/local/bin/$t"
 done
-sh "$SCRIPTS/assert_binary_compatible.sh" "$THIN"/* >&2
+MAVERICKS_ALLOW_ARCHS="x86_64 arm64" sh "$SCRIPTS/assert_binary_compatible.sh" $BIN >&2
 
 # bundle the orlp/ed25519 (zlib) third-party notice into the installed payload.
 mkdir -p "$STAGE/usr/local/share/doc/mavericks-ed25519"

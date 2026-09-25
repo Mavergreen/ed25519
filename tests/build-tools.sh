@@ -1,6 +1,13 @@
 #!/bin/sh
 set -eu
 R="$(cd "$(dirname "$0")/.." && pwd)"
+# The arm64 slice must build against the pinned arm64 SDK (fetch_sdk.sh --arch arm64), never
+# whatever SDK the host's own toolchain defaults to. Checked statically (grep), so it fails on ANY
+# host, not only where the cross build below actually runs.
+grep -qF 'SDK_ARM64="${SDK_ARM64:-$(sh "$SCRIPTS/fetch_sdk.sh" --arch arm64)}"' "$R/build/build-tools.sh" \
+  || { echo "build-tools.sh: SDK_ARM64 must come from fetch_sdk.sh --arch arm64" >&2; exit 1; }
+grep -qF 'cc -arch arm64 -isysroot "$SDK_ARM64"' "$R/build/build-tools.sh" \
+  || { echo "build-tools.sh: the arm64 cc invocation must pass -isysroot \"\$SDK_ARM64\"" >&2; exit 1; }
 # shipyard's scripts: $SHIPYARD_SCRIPTS in CI (exported by install@v1), else a sibling checkout.
 # This used to hardcode one developer's absolute path, so the test only ever passed on that machine --
 # invisible until CI started running it. With neither available there is nothing to build against, so
