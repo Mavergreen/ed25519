@@ -1,4 +1,5 @@
 #!/bin/sh
+# platform: host-agnostic
 set -eu
 R="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$(mktemp -d "${TMPDIR:-/tmp}/fetch-ed25519.XXXXXX")"; trap 'rm -rf "$DEST"' EXIT   # template: 10.9 BSD mktemp requires one

@@ -1,4 +1,5 @@
 #!/bin/sh
+# platform: host-agnostic
 # Print the URL of what changed upstream for one ed25519 version. shipyard's upstream-notes.sh links
 # it from our release notes when a release ships a NEW upstream.
 #   usage: upstream-release-notes-url.sh <upstream-version>      (bare: 20221003)

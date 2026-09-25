@@ -1,3 +1,4 @@
+# platform: host-agnostic
 # build/lib.sh -- sourced helpers. The shared implementations (upstream_version, msc_scripts) live in
 # shipyard; this locates them and adds what is genuinely ours.
 : "${MAVERICKS_ROOT:=$(cd "$(dirname "${BASH_SOURCE:-$0}")/.." 2>/dev/null && pwd || pwd)}"
@@ -22,3 +23,4 @@ upstream_commit() { tr -d '[:space:]' < "$MAVERICKS_ROOT/UPSTREAM_COMMIT"; }
 # The shipped tools, one src/<tool>.c each. build-tools.sh builds and package-pkg.sh guards this one
 # list, so a tool cannot be built without being checked (or checked without being built).
 ED_TOOLS="ed25519-keygen ed25519-sign ed25519-verify"
+ED_TREE="usr/local/mavergreen/ed25519"

@@ -1,7 +1,7 @@
 name: release
 
 # Builds Universal ed25519 tools (x86_64@10.9 + arm64@11) on an Apple-Silicon runner and
-# ships a double-clickable .pkg + tarball. Entry points:
+# ships a double-clickable .pkg. Entry points:
 #   - push to main: if the pinned orlp/ed25519 commit's date has no release yet -> cut
 #     v<date>-mavericks.1. Otherwise build only (CI smoke), no release.
 #   - workflow_dispatch (local_release=true): cut the next v<date>-mavericks.(N+1).
@@ -100,7 +100,7 @@ jobs:
       - name: Build the Universal tools
         run: sh build/build-tools.sh
 
-      - name: Package the .pkg + tarball
+      - name: Package the .pkg
         run: VERSION="${{ steps.ver.outputs.full }}" sh build/package-pkg.sh
 
       - name: Collect artifacts

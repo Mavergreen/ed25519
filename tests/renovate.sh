@@ -1,4 +1,5 @@
 #!/bin/sh
+# platform: host-agnostic
 set -eu
 R="$(cd "$(dirname "$0")/.." && pwd)"
 J="$R/.github/renovate.json"

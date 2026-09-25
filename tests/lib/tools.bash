@@ -1,3 +1,4 @@
+# platform: host-agnostic
 # Shared by the tools' bats files (tests/lib/ is not itself run: run-repo-tests.sh takes top-level
 # tests only).
 

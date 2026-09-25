@@ -1,4 +1,5 @@
 #!/bin/sh
+# platform: host-agnostic
 # Write UPSTREAM_VERSION = the pinned orlp/ed25519 commit's committer date (YYYYMMDD),
 # read locally from the checkout produced by fetch-ed25519.sh. Single source of truth is
 # the pinned SHA (UPSTREAM_COMMIT, Renovate-managed); the date -- and thus the version --

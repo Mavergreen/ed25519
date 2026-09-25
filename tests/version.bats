@@ -1,3 +1,4 @@
+# platform: host-agnostic
 setup() {
   REPO="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
   TMP="$(mktemp -d "${TMPDIR:-/tmp}/version-bats.XXXXXX")"   # template: 10.9 BSD mktemp requires one

@@ -1,4 +1,5 @@
 #!/bin/sh
+# platform: host-agnostic
 # Fetch orlp/ed25519 at the pinned commit (build/../UPSTREAM_COMMIT) via shipyard's clone_pinned.sh:
 # it fetches exactly that commit and verifies the checkout is it (git also verifies the fetched objects
 # hash to the sha), so there is no separate tarball checksum to keep in sync. Renovate bumps

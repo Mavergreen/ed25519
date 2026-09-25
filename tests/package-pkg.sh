@@ -1,4 +1,5 @@
 #!/bin/sh
+# platform: macOS-only -- pkgutil expands the built pkg
 set -eu
 R="$(cd "$(dirname "$0")/.." && pwd)"
 # shipyard's scripts: $SHIPYARD_SCRIPTS in CI (exported by install@v1), else a sibling checkout.
@@ -29,4 +30,14 @@ pkgutil --expand-full "$pkg" "$X/full"
 find "$X/full" -type f -name ed25519-sign  | grep -q . || { echo "pkg payload missing ed25519-sign"  >&2; exit 1; }
 find "$X/full" -type f -name ed25519-keygen | grep -q . || { echo "pkg payload missing ed25519-keygen" >&2; exit 1; }
 find "$X/full" -type f -name ed25519-verify | grep -q . || { echo "pkg payload missing ed25519-verify" >&2; exit 1; }
+first="$(sed -n 's/.*<line choice="\([^"]*\)".*/\1/p' "$X/x/Distribution" | grep -v '^default$' | head -1)"
+[ "$first" = dev.mavergreen.base ] || { echo "the base component must come first, got $first" >&2; exit 1; }
+m="$(find "$X/full" -path '*/usr/local/mavergreen/ed25519/mavergreen.plist' | head -1)"
+[ -n "$m" ] && [ "$(/usr/libexec/PlistBuddy -c 'Print :product' "$m")" = ed25519 ] \
+  || { echo "the pkg must carry the ed25519 manifest at its tree root" >&2; exit 1; }
+[ "$(find "$X/full" -type f -name ed25519-sign | wc -l | tr -d ' ')" = 1 ] \
+  || { echo "exactly one ed25519-sign in the payload: sign_and_appcast.sh signs every family release with the first it finds" >&2; exit 1; }
+s="$(find "$X/full" -type f -name ed25519-sign)"
+[ -f "$(dirname "$s")/ed25519-verify" ] || { echo "ed25519-verify must sit beside ed25519-sign; sign_and_appcast.sh looks for it there" >&2; exit 1; }
+find "$X/full" -path '*/usr/local/bin/*' | grep -q . && { echo "nothing installs into /usr/local/bin" >&2; exit 1; }
 echo "package-pkg OK"
