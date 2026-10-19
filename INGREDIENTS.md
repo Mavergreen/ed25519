@@ -35,3 +35,7 @@ to write `dist/RELEASE_NOTES.md`, which the shared `publish-release.yml` uses as
 it refuses an empty one. This repo has no Sparkle updater and publishes no appcast, so the Release
 body is that file's only consumer; there is no second copy to keep in sync. See `release-notes/`
 for the (optional) per-release prose convention.
+
+## Conformance deviations
+
+- on-target: no 10.9 acceptance job yet; exit: a release.yml job on Mavergreen/mavericks-vm@v1 that installs this run's pkg in the guest and runs what it ships, which publish needs
