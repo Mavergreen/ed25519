@@ -1,0 +1,2 @@
+A file signed by the ed25519-sign shipyard pins (20221003-mavericks.7, built on a Mac);
+every later build must sign it to the same bytes.

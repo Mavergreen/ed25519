@@ -84,3 +84,33 @@ sign() { "$BIN/ed25519-sign" "$@"; }
   [ "$status" -eq 0 ]
   refute_key_material "$BATS_TEST_TMPDIR/k" "$output"
 }
+
+# A fixture signed by the release shipyard pins as the family's signer, built on a Mac: Ed25519 is
+# deterministic, so any build of these tools, for any host, must sign it to the same bytes.
+@test "signatures equal across builds: the pinned Mac release's signature over a fixture" {
+  FX="$BATS_TEST_DIRNAME/fixtures/pinned-signer"
+  run --separate-stderr sign -f "$FX/throwaway-key" "$FX/message"
+  [ "$status" -eq 0 ]
+  [ "$output" = "$(cat "$FX/signature")" ]
+  run --separate-stderr "$BIN/ed25519-verify" -p "$(cat "$FX/throwaway-key.pub")" "$FX/message" "$(cat "$FX/signature")"
+  [ "$status" -eq 0 ]
+}
+
+@test "ed25519-keygen writes the private key 0600, the public key beside it, and prints the public key" {
+  run --separate-stderr "$BIN/ed25519-keygen" -f "$BATS_TEST_TMPDIR/k"
+  [ "$status" -eq 0 ]
+  [ "$(ls -l "$BATS_TEST_TMPDIR/k" | cut -c1-10)" = "-rw-------" ]
+  grep -qE '^[A-Za-z0-9+/]{128}$' "$BATS_TEST_TMPDIR/k"
+  grep -qE '^[A-Za-z0-9+/]{43}=$' "$BATS_TEST_TMPDIR/k.pub"
+  [[ "$output" == *"$(cat "$BATS_TEST_TMPDIR/k.pub")"* ]] || false
+}
+
+@test "ed25519-keygen's only entropy source is /dev/urandom" {
+  REPO="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
+  ED="$(ED_ROOT="$REPO" sh "$REPO/build/fetch-ed25519.sh" 2>/dev/null)"
+  grep -q 'ed25519_create_seed(seed) != 0' "$REPO/src/ed25519-keygen.c"
+  [ "$(grep -o '"/dev/[a-z]*"' "$ED/seed.c")" = '"/dev/urandom"' ]
+  run grep -nE '(^|[^A-Za-z0-9_])(s?rand|random|arc4random[a-z_]*|getrandom|getentropy|time|clock|getpid)[[:space:]]*\(' \
+    "$ED/seed.c" "$REPO/src/ed25519-keygen.c"
+  [ "$status" -eq 1 ]
+}

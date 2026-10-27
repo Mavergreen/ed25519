@@ -3,6 +3,7 @@
 # The default build root is $MAVERICKS_BUILD_ROOT (outside the tree); this is only the
 # deliberate-in-tree escape hatch (MAVERICKS_BUILD_ROOT="$PWD" sh build/build-tools.sh).
 /ed25519-cross/
+/ed25519-linux/
 ._*
 .DS_Store
 .superpowers/

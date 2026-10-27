@@ -2,18 +2,25 @@
 # Shared by the tools' bats files (tests/lib/ is not itself run: run-repo-tests.sh takes top-level
 # tests only).
 
-# Compile the three tools for THIS host into $BIN. Unlike the Universal build (cross-only: its arm64
-# slice targets 11.0), a host compile works on a native 10.9 box too, so the tools' contracts are
-# checked on a Mavericks machine as well as in CI. Call from setup_file.
+# The tools under test: $BIN when the caller names a built set (the release's Linux tarball, say),
+# else the three compiled for THIS host with $CC (default cc), which a native 10.9 box can do too.
+# Call from setup_file.
 build_tools() {
   REPO="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
+  if [ -n "${BIN:-}" ]; then
+    for t in ed25519-keygen ed25519-sign ed25519-verify; do
+      [ -x "$BIN/$t" ] || { echo "BIN=$BIN has no executable $t" >&2; return 1; }
+    done
+    export BIN
+    return 0
+  fi
   # shipyard's scripts: $SHIPYARD_SCRIPTS in CI (exported by install@v1), else a sibling checkout.
   : "${MAVERICKS_SCRIPTS:=${SHIPYARD_SCRIPTS:-$REPO/../mavergreen-shipyard/scripts}}"
   [ -d "$MAVERICKS_SCRIPTS" ] || skip "shipyard scripts not found at $MAVERICKS_SCRIPTS"
   ED="$(ED_ROOT="$REPO" sh "$REPO/build/fetch-ed25519.sh")"
   BIN="$BATS_FILE_TMPDIR/bin"; mkdir -p "$BIN"
   for t in ed25519-keygen ed25519-sign ed25519-verify; do
-    cc -I"$REPO/src" -I"$ED" "$REPO/src/$t.c" "$ED"/*.c -o "$BIN/$t"
+    "${CC:-cc}" -I"$REPO/src" -I"$ED" "$REPO/src/$t.c" "$ED"/*.c -o "$BIN/$t"
   done
   export BIN
 }

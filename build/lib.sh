@@ -11,9 +11,9 @@ ED_ROOT="$MAVERICKS_ROOT"; export ED_ROOT   # kept: build scripts here still ref
 #           2.96s / 88% on local disk, identical user time -- the whole difference is I/O wait.
 : "${MAVERICKS_BUILD_ROOT:=${TMPDIR:-/tmp}/mm-build}"
 export MAVERICKS_BUILD_ROOT
-# Only cross mode exists for this repo (build-tools.sh refuses anything else: the arm64 slice
-# targets macOS 11.0, which a native 10.9 toolchain cannot do).
-ED_BUILD="$MAVERICKS_BUILD_ROOT/ed25519-cross"; export ED_BUILD
+# One build directory per target: ed25519-cross holds the pkg's Mach-O tools (build-tools.sh),
+# ed25519-linux the tarball's (build-tools-linux.sh sets ED_TARGET=linux).
+ED_BUILD="$MAVERICKS_BUILD_ROOT/ed25519-${ED_TARGET:-cross}"; export ED_BUILD
 
 # Repo-specific: orlp/ed25519 publishes no releases, so the pinned COMMIT is the upstream identity
 # and its date is the version. Renovate bumps UPSTREAM_COMMIT; build/derive-upstream-version.sh
