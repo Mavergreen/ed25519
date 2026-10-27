@@ -6,6 +6,9 @@ General-purpose command-line EdDSA tools built for Mac OS X 10.9 Mavericks and h
 - `ed25519-sign`
 - `ed25519-verify`
 
+Each release also carries `ed25519-<version>-linux-x86_64.tar.gz`: the same tools for x86_64 Linux
+(glibc 2.35 or later), under `opt/mavergreen/ed25519/`.
+
 ## Set up a Sparkle updater
 
 In your project (assuming 1Password and GitHub):
