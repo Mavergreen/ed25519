@@ -30,9 +30,9 @@ WORK="$(mktemp -d "$ED_BUILD/obj.XXXXXX")"; trap 'rm -rf "$WORK"' EXIT
 rm -rf "$STAGE"; mkdir -p "$STAGE/$ED_TREE/bin"
 
 for tool in $ED_TOOLS; do
-  "$CL/bin/clang" --no-default-config --target=x86_64-apple-macos10.9 -isysroot "$SDK" --ld-path="$CL/bin/ld64.lld" \
+  "$CL/bin/clang" --no-default-config --target=x86_64-apple-macos10.9 -isysroot "$SDK" -fuse-ld=lld --ld-path="$CL/bin/ld64.lld" \
     -I"$SRC" -I"$ED" "$SRC/$tool.c" "$ED"/*.c -o "$WORK/$tool.x86_64"
-  "$CL/bin/clang" --no-default-config --target=arm64-apple-macos11.0 -isysroot "$SDK_ARM64" --ld-path="$CL/bin/ld64.lld" \
+  "$CL/bin/clang" --no-default-config --target=arm64-apple-macos11.0 -isysroot "$SDK_ARM64" -fuse-ld=lld --ld-path="$CL/bin/ld64.lld" \
     -I"$SRC" -I"$ED" "$SRC/$tool.c" "$ED"/*.c -o "$WORK/$tool.arm64"
   "$LIPO" -create "$WORK/$tool.x86_64" "$WORK/$tool.arm64" -output "$STAGE/$ED_TREE/bin/$tool"
   chmod 755 "$STAGE/$ED_TREE/bin/$tool"

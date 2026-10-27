@@ -28,6 +28,7 @@ done
 for bad in SPARKLE_PRIVATE_KEY sign_and_appcast appcast; do
   grep -qi "$bad" "$W" && { echo "release.yml should not mention $bad" >&2; fail=1; } || true
 done
+[ "$fail" -eq 0 ] || exit 1
 python3 -c 'import yaml' 2>/dev/null || { echo "python3 with PyYAML is needed to read release.yml's jobs -- skipping" >&2; exit 77; }
 python3 - "$W" <<'PY' || fail=1
 import re, sys, yaml

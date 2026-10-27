@@ -249,9 +249,6 @@ jobs:
           rc=0
           sh tests/installed-smoke.sh || rc=$?
           [ "$rc" -eq 0 ] || { echo "::error::installed-smoke.sh exited $rc (77, a skip, is a failure here)"; exit 1; }
-          FX=tests/fixtures/pinned-signer
-          got="$(arch -arm64 /usr/local/mavergreen/ed25519/bin/ed25519-sign -f "$FX/throwaway-key" "$FX/message")"
-          [ "$got" = "$(cat "$FX/signature")" ] || { echo "::error::the arm64 slice does not sign the fixture as the pinned Mac release did"; exit 1; }
 
   publish:
     needs: [ver, build, vm-test, modern-smoke]

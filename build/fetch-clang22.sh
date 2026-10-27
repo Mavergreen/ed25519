@@ -28,7 +28,8 @@ case "$(uname -s)" in
     sh "$SHIPYARD_SCRIPTS/fetch_product_tar.sh" clang22 "$V" "$sha" "$d" >/dev/null ;;
   Darwin)
     inst="${CLANG22_INSTALLED:-/usr/local/mavergreen/clang22-cross}"
-    if has_tools "$inst" && grep -A1 '<key>version</key>' "$inst/mavergreen.plist" 2>/dev/null | grep -q "<string>$V</string>"; then
+    if has_tools "$inst" && [ -f "$inst/mavergreen.plist" ] \
+       && [ "$("$(sh "$SHIPYARD_SCRIPTS/fetch_stevedore.sh")" plist get "$inst/mavergreen.plist" version 2>/dev/null)" = "$V" ]; then
       printf '%s\n' "$inst"; exit 0
     fi
     d="$W/cross"
