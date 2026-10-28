@@ -176,6 +176,8 @@ jobs:
           VER: ${{ needs.ver.outputs.version }}
         run: |
           set -eu
+          CL="$(sh build/fetch-clang22.sh)"
+          export LIPO="$CL/bin/llvm-lipo" OTOOL="$CL/bin/llvm-otool"
           facts="$(sh "$SHIPYARD_SCRIPTS/artifact-facts.sh" "$DIST" "$VER")"
           printf '%s\n' "$facts" | sh "$SHIPYARD_SCRIPTS/check-artifact-conformance.sh"
 
